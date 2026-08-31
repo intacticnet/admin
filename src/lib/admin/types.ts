@@ -219,3 +219,82 @@ export interface SiteSetting {
   value: string;
   updated_at: string;
 }
+
+// ============================================================
+// Client Management Types
+// ============================================================
+
+export type ClientStatus = 'active' | 'inactive' | 'lead';
+
+export interface Client {
+  id: string;
+  company_name: string;
+  contact_person: string;
+  email: string;
+  phone: string | null;
+  industry_id: string | null;
+  address: string | null;
+  logo_url: string | null;
+  status: ClientStatus;
+  notes: string | null;
+  supabase_user_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type ProjectStatus = 'planning' | 'active' | 'on_hold' | 'completed' | 'cancelled';
+
+export interface Project {
+  id: string;
+  client_id: string;
+  title: string;
+  description: string | null;
+  status: ProjectStatus;
+  progress: number;
+  start_date: string | null;
+  deadline: string | null;
+  budget: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type MilestoneStatus = 'pending' | 'in_progress' | 'completed';
+
+export interface ProjectMilestone {
+  id: string;
+  project_id: string;
+  title: string;
+  description: string | null;
+  status: MilestoneStatus;
+  due_date: string | null;
+  sort_order: number;
+  created_at: string;
+}
+
+export type InvoiceStatus = 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled';
+
+export interface InvoiceItem {
+  id?: string;
+  invoice_id?: string;
+  description: string;
+  quantity: number;
+  rate: number;
+  amount: number;
+  sort_order: number;
+}
+
+export interface Invoice {
+  id: string;
+  client_id: string;
+  project_id: string | null;
+  invoice_number: string;
+  status: InvoiceStatus;
+  issue_date: string | null;
+  due_date: string | null;
+  subtotal: number;
+  tax: number;
+  total: number;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}

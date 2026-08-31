@@ -13,6 +13,10 @@ import type {
   BlogPost,
   TeamMember,
   SiteSetting,
+  Client,
+  Project,
+  ProjectMilestone,
+  Invoice,
 } from './types';
 
 const API_BASE = '/api';
@@ -104,3 +108,27 @@ export const settings = {
       method: 'DELETE',
     }),
 };
+
+// ---- Clients ----
+
+export const clients = crud<Client>('/clients');
+
+// ---- Projects ----
+
+export const projects = crud<Project>('/projects');
+
+// ---- Project Milestones ----
+
+export const milestones = {
+  getAll: (projectId: string) =>
+    fetchApi<ProjectMilestone[]>(`${API_BASE}/projects/${projectId}/milestones`),
+  bulkUpsert: (projectId: string, data: ProjectMilestone[]) =>
+    fetchApi<ProjectMilestone[]>(`${API_BASE}/projects/${projectId}/milestones`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+};
+
+// ---- Invoices ----
+
+export const invoices = crud<Invoice>('/invoices');

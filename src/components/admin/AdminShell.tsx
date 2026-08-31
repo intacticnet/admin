@@ -14,6 +14,9 @@ import {
   Users,
   UserCog,
   Settings,
+  Briefcase,
+  FolderKanban,
+  Receipt,
   LogOut,
   Menu,
   X,
@@ -27,6 +30,9 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/', icon: <LayoutDashboard className="size-4" /> },
+  { label: 'Clients', href: '/clients', icon: <Briefcase className="size-4" /> },
+  { label: 'Projects', href: '/projects', icon: <FolderKanban className="size-4" /> },
+  { label: 'Invoices', href: '/invoices', icon: <Receipt className="size-4" /> },
   { label: 'Services', href: '/services', icon: <Wrench className="size-4" /> },
   { label: 'Products', href: '/products', icon: <Box className="size-4" /> },
   { label: 'Industries', href: '/industries', icon: <Building2 className="size-4" /> },
@@ -42,6 +48,16 @@ function getPageTitle(pathname: string): string {
   const item = navItems.find((i) => i.href === pathname);
   if (item) return item.label;
   const parts = pathname.split('/').filter(Boolean);
+  // Handle detail/new pages like /clients/new, /clients/123
+  if (parts.length === 2) {
+    const parentItem = navItems.find((i) => i.href === `/${parts[0]}`);
+    if (parentItem) {
+      const sub = parts[1];
+      return sub === 'new'
+        ? `${parentItem.label} / New`
+        : `${parentItem.label} / Edit`;
+    }
+  }
   if (parts.length >= 2) {
     const parentItem = navItems.find((i) => i.href === `/${parts[0]}/${parts[1]}`);
     if (parentItem) {

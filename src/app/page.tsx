@@ -9,6 +9,9 @@ import {
   Users,
   UserCog,
   ArrowRight,
+  Briefcase,
+  FolderKanban,
+  Receipt,
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
@@ -53,7 +56,6 @@ function statusBadgeVariant(status: string) {
 export default async function AdminDashboardPage() {
   const supabase = await createClient();
 
-  // If Supabase is not configured, show a message instead of crashing
   if (!supabase) {
     return (
       <div className="space-y-6">
@@ -65,25 +67,51 @@ export default async function AdminDashboardPage() {
     );
   }
 
-  // Fetch counts from all content tables
-  const [servicesRes, productsRes, industriesRes, caseStudiesRes, blogPostsRes, authorsRes, teamRes, recentPostsRes] =
-    await Promise.all([
-      supabase.from('services').select('id', { count: 'exact', head: true }),
-      supabase.from('products').select('id', { count: 'exact', head: true }),
-      supabase.from('industries').select('id', { count: 'exact', head: true }),
-      supabase.from('case_studies').select('id', { count: 'exact', head: true }),
-      supabase.from('blog_posts').select('id', { count: 'exact', head: true }),
-      supabase.from('authors').select('id', { count: 'exact', head: true }),
-      supabase.from('team_members').select('id', { count: 'exact', head: true }),
-      supabase
-        .from('blog_posts')
-        .select('title, slug, status, published_at, authors(name)')
-        .eq('status', 'published')
-        .order('published_at', { ascending: false })
-        .limit(5),
+  const [
+    servicesRes, productsRes, industriesRes, caseStudiesRes,
+    blogPostsRes, authorsRes, teamRes, recentPostsRes,
+    clientsRes, projectsRes, invoicesRes,
+  ] = await Promise.all([
+    supabase.from('services').select('id', { count: 'exact', head: true }),
+    supabase.from('products').select('id', { count: 'exact', head: true }),
+    supabase.from('industries').select('id', { count: 'exact', head: true }),
+    supabase.from('case_studies').select('id', { count: 'exact', head: true }),
+    supabase.from('blog_posts').select('id', { count: 'exact', head: true }),
+    supabase.from('authors').select('id', { count: 'exact', head: true }),
+    supabase.from('team_members').select('id', { count: 'exact', head: true }),
+    supabase
+      .from('blog_posts')
+      .select('title, slug, status, published_at, authors(name)')
+      .eq('status', 'published')
+      .order('published_at', { ascending: false })
+      .limit(5),
+    supabase.from('clients').select('id', { count: 'exact', head: true }),
+    supabase.from('projects').select('id', { count: 'exact', head: true }),
+    supabase.from('invoices').select('id', { count: 'exact', head: true }),
   ]);
 
   const stats: StatCard[] = [
+    {
+      label: 'Clients',
+      href: '/clients',
+      icon: <Briefcase className="size-5" />,
+      count: clientsRes.count ?? 0,
+      color: 'text-[#115FC9] bg-blue-50',
+    },
+    {
+      label: 'Projects',
+      href: '/projects',
+      icon: <FolderKanban className="size-5" />,
+      count: projectsRes.count ?? 0,
+      color: 'text-violet-600 bg-violet-50',
+    },
+    {
+      label: 'Invoices',
+      href: '/invoices',
+      icon: <Receipt className="size-5" />,
+      count: invoicesRes.count ?? 0,
+      color: 'text-emerald-600 bg-emerald-50',
+    },
     {
       label: 'Total Services',
       href: '/services',
@@ -145,7 +173,6 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      {/* Stat Cards Grid */}
       <section aria-label="Content statistics">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {stats.map((stat) => (
@@ -167,42 +194,23 @@ export default async function AdminDashboardPage() {
         </div>
       </section>
 
-      {/* Recent Blog Posts */}
       <section aria-label="Recent blog posts">
         <div className="bg-white rounded-xl border border-zinc-200 shadow-sm">
           <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
             <h2 className="text-base font-semibold text-zinc-900">Recent Blog Posts</h2>
-            <Link
-              href="/blog"
-              className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors"
-            >
-              View all
-            </Link>
+            <Link href="/blog" className="text-sm text-zinc-500 hover:text-zinc-900 transition-colors">View all</Link>
           </div>
-
           {recentPosts.length === 0 ? (
-            <div className="px-6 py-12 text-center text-sm text-zinc-400">
-              No published blog posts yet.
-            </div>
+            <div className="px-6 py-12 text-center text-sm text-zinc-400">No published blog posts yet.</div>
           ) : (
             <div className="divide-y divide-zinc-100">
               {recentPosts.map((post) => (
-                <div
-                  key={post.slug}
-                  className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/50 transition-colors"
-                >
+                <div key={post.slug} className="flex items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/50 transition-colors">
                   <div className="min-w-0 flex-1">
                     <div className="text-sm font-medium text-zinc-900 truncate">{post.title}</div>
-                    <div className="text-xs text-zinc-400 mt-0.5">
-                      {post.author_name} · {formatDate(post.published_at)}
-                    </div>
+                    <div className="text-xs text-zinc-400 mt-0.5">{post.author_name} · {formatDate(post.published_at)}</div>
                   </div>
-                  <Badge
-                    variant="outline"
-                    className={`shrink-0 text-xs capitalize ${statusBadgeVariant(post.status)}`}
-                  >
-                    {post.status}
-                  </Badge>
+                  <Badge variant="outline" className={`shrink-0 text-xs capitalize ${statusBadgeVariant(post.status)}`}>{post.status}</Badge>
                 </div>
               ))}
             </div>
